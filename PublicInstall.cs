@@ -141,8 +141,7 @@ internal static class PublicInstall
                 return existing;
             }
             Report(progress, "Comprobando Rust, las herramientas de C++ y el SDK de Windows…");
-            string cargo = FindCargo();
-            CheckMsvc();
+            BuildTools tools = BuildTools.Detect();
 
             string nonce = Guid.NewGuid().ToString("N");
             string name = sha + "-" + nonce + "-v2";
@@ -164,10 +163,7 @@ internal static class PublicInstall
 
                 Report(progress, "Compilando en esta PC. La primera vez puede tardar varios minutos…");
                 string target = Path.Combine(scratch, "target");
-                // Rustup applies the project's rust-toolchain.toml in VIctory's source directory.
-                string channel = key == "xcl" ? "+stable-x86_64-pc-windows-msvc " : "";
-                string args = channel + "build --locked --release --target " + Target + " -p " + key + " --bin " + key + " --jobs 4";
-                Run(cargo, args, source, target, progress, "Falló la compilación de " + key);
+                Compile(tools, key, source, target, progress);
                 string executable = Path.Combine(stage, key + ".exe");
                 File.Copy(Path.Combine(target, Target, "release", key + ".exe"), executable);
                 File.Copy(Path.Combine(source, "LICENSE"), Path.Combine(stage, "LICENSE"));
@@ -275,42 +271,17 @@ internal static class PublicInstall
         VerifyReceipt(folder, key, name.Substring(0, 40));
     }
 
-    private static string FindCargo()
+    private static void Compile(BuildTools tools, string key, string source, string target, IProgress<string> progress)
     {
-        var bins = new List<string>();
-        string cargoHome = Environment.GetEnvironmentVariable("CARGO_HOME");
-        if (!String.IsNullOrEmpty(cargoHome)) bins.Add(Path.Combine(cargoHome, "bin"));
-        bins.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cargo", "bin"));
-        bins.AddRange((Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'));
-        foreach (string candidate in bins)
-        {
-            string directory = candidate.Trim().Trim('"');
-            if (!Path.IsPathRooted(directory)) continue;
-            string cargo = Path.Combine(directory, "cargo.exe");
-            if (File.Exists(cargo) && File.Exists(Path.Combine(directory, "rustup.exe"))) return cargo;
-        }
-        throw new InvalidOperationException("Para compilar, instalá Rust x64 para Windows con rustup desde https://rustup.rs/ y las Build Tools de Visual Studio con «Desarrollo para el escritorio con C++» y el SDK de Windows. Después volvé a pulsar Descargar.");
-    }
-
-    private static void CheckMsvc()
-    {
-        string vcHome = Environment.GetEnvironmentVariable("VCToolsInstallDir");
-        if (!String.IsNullOrEmpty(vcHome) && File.Exists(Path.Combine(vcHome, @"bin\Hostx64\x64\cl.exe")) &&
-            !String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("LIB"))) return;
-        string vswhere = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                                      @"Microsoft Visual Studio\Installer\vswhere.exe");
-        if (File.Exists(vswhere))
-        {
-            var start = new ProcessStartInfo(vswhere, "-latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath")
-                { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true };
-            using (var process = Process.Start(start))
-            {
-                string installation = process.StandardOutput.ReadToEnd().Trim();
-                process.WaitForExit();
-                if (process.ExitCode == 0 && Directory.Exists(installation)) return;
-            }
-        }
-        throw new InvalidOperationException("Instalá las Build Tools de Visual Studio con «Desarrollo para el escritorio con C++», herramientas MSVC x64 y un SDK de Windows 10 u 11 desde https://visualstudio.microsoft.com/visual-cpp-build-tools/ y volvé a pulsar Descargar.");
+        // Resolve Cargo through the selected toolchain, even if the Cargo found in PATH is not a rustup proxy.
+        string channel = key == "xcl" ? "+stable-x86_64-pc-windows-msvc " : "";
+        string cargo = Run(tools.Rustup, channel + "which cargo", source, null, null,
+            "Rustup no pudo localizar Cargo para la versión de Rust del proyecto",
+            tools.BuildPath(Path.GetDirectoryName(tools.Cargo)));
+        if (String.IsNullOrEmpty(cargo) || !Path.IsPathRooted(cargo) || !File.Exists(cargo))
+            throw new InvalidOperationException("Rustup no devolvió un cargo.exe disponible para el proyecto. Revisá la instalación de Cargo con rustup.");
+        string args = "build --locked --release --target " + Target + " -p " + key + " --bin " + key + " --jobs 4";
+        Run(cargo, args, source, target, progress, "Falló la compilación de " + key, tools.BuildPath(Path.GetDirectoryName(cargo)));
     }
 
     private static void Download(string url, string file)
@@ -453,12 +424,18 @@ internal static class PublicInstall
         if (!HasDxc(stage)) throw new InvalidDataException("Los archivos DXC no coinciden con la versión de Microsoft.");
     }
 
-    private static void Run(string file, string args, string directory, string target, IProgress<string> progress, string error)
+    private static string Run(string file, string args, string directory, string target, IProgress<string> progress, string error, string searchPath = null)
     {
         var start = new ProcessStartInfo(file, args) { WorkingDirectory = directory, UseShellExecute = false,
             CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         // XCL checks its private child-process mode before it processes --help.
         start.EnvironmentVariables.Remove("XCL_HOST");
+        if (searchPath != null)
+        {
+            start.EnvironmentVariables["PATH"] = searchPath;
+            start.StandardOutputEncoding = Utf8;
+            start.StandardErrorEncoding = Utf8;
+        }
         if (target != null) start.EnvironmentVariables["CARGO_TARGET_DIR"] = target;
         var tail = new Queue<string>();
         var timer = Stopwatch.StartNew();
@@ -477,9 +454,13 @@ internal static class PublicInstall
                 }
             }
         };
+        string output = null;
         using (var process = new Process { StartInfo = start })
         {
-            process.OutputDataReceived += receive;
+            process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs ev) {
+                if (!String.IsNullOrWhiteSpace(ev.Data)) output = ev.Data.Trim();
+                receive(sender, ev);
+            };
             process.ErrorDataReceived += receive;
             process.Start();
             process.BeginOutputReadLine();
@@ -488,5 +469,6 @@ internal static class PublicInstall
             if (process.ExitCode != 0)
                 throw new InvalidOperationException(error + "." + Environment.NewLine + String.Join(Environment.NewLine, tail.ToArray()));
         }
+        return output;
     }
 }

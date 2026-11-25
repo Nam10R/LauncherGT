@@ -20,7 +20,7 @@ foreach ($logo in @('Xcl.png','Victory.png')) {
     $options += '/resource:' + (Join-Path $projectDir ('arte\' + $logo)) + ',' + $logo
 }
 $options += '/resource:' + (Join-Path $projectDir 'Publisher.xml') + ',Publisher.xml'
-foreach ($source in @('Lanzador.cs','PublicLibrary.cs','PublicInstall.cs','Updates.cs','SelfUpdate.cs','CgbjStatus.cs','PersonalProtection.cs')) {
+foreach ($source in @('Lanzador.cs','PublicLibrary.cs','PublicInstall.cs','BuildTools.cs','Updates.cs','SelfUpdate.cs','CgbjStatus.cs','PersonalProtection.cs')) {
     $options += Join-Path $projectDir $source
 }
 & (Join-Path $framework 'csc.exe') @options

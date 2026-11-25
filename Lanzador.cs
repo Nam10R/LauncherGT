@@ -16,7 +16,7 @@ using System.Windows.Threading;
 [assembly: AssemblyTitle("GTA VI · Lanzador de emuladores")]
 [assembly: AssemblyDescription("Lanzador de XCL y VIctory con seguimiento de CGBJ")]
 [assembly: AssemblyProduct("GTA VI · Lanzador")]
-[assembly: AssemblyVersion("2.2.1.0")]
+[assembly: AssemblyVersion("2.2.2.0")]
 
 internal static class Program
 {
