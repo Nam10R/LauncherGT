@@ -16,7 +16,7 @@ using System.Windows.Threading;
 [assembly: AssemblyTitle("GTA VI · Lanzador de emuladores")]
 [assembly: AssemblyDescription("Lanzador de XCL y VIctory con seguimiento de CGBJ")]
 [assembly: AssemblyProduct("GTA VI · Lanzador")]
-[assembly: AssemblyVersion("2.2.0.0")]
+[assembly: AssemblyVersion("2.2.1.0")]
 
 internal static class Program
 {
@@ -93,6 +93,8 @@ internal sealed class LauncherUi
         Window.Height = Math.Min(Window.Height, SystemParameters.WorkArea.Height);
         refresh = (Button)Window.FindName("Refresh");
         footer = (TextBlock)Window.FindName("Footer");
+        var discord = (Button)Window.FindName("Discord");
+        BindExternalLink(discord, "https://discord.gg/ZFWCgmpNB", "Discord");
         launcherVersion = (TextBlock)Window.FindName("LauncherVersion");
         launcherVersion.Text = "Launcher " + SelfUpdate.Current.ToString(3);
         updateLauncher = (Button)Window.FindName("UpdateLauncher");
@@ -149,15 +151,20 @@ internal sealed class LauncherUi
         card.Play.Content = "Ver en PortWatch";
         const string article = "https://portwatch-vi.xyz/news/2026-11-24-cgbj-in-game";
         card.Play.ToolTip = "Abrir el informe de PortWatch sobre CGBJ";
-        card.Play.CommandParameter = article;
-        card.Play.CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage,
-            delegate {
-                try { Process.Start(new ProcessStartInfo(article) { UseShellExecute = true }); }
-                catch (Exception error) { Alert(error, "PortWatch"); }
-            },
-            delegate(object sender, CanExecuteRoutedEventArgs e) { e.CanExecute = Object.Equals(e.Parameter, article); }));
-        card.Play.Command = NavigationCommands.GoToPage;
+        BindExternalLink(card.Play, article, "PortWatch");
         return card;
+    }
+
+    private void BindExternalLink(Button button, string url, string title)
+    {
+        button.CommandParameter = url;
+        button.CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage,
+            delegate {
+                try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+                catch (Exception error) { Alert(error, title); }
+            },
+            delegate(object sender, CanExecuteRoutedEventArgs e) { e.CanExecute = Object.Equals(e.Parameter, url); }));
+        button.Command = NavigationCommands.GoToPage;
     }
 
     private void AddCard(string name, string logoResource, string accent)
