@@ -1,0 +1,60 @@
+GTA VI · Lanzador para Windows x64
+
+Advertencia: para jugar al GTA 6, necesitás tener toda la data (208,50 GB).
+La emulación es experimental. El avance y el rendimiento dependen del
+emulador, del equipo y de la versión del juego.
+
+Primera vez
+
+1. Extraé todo el ZIP en una carpeta. Dejá «Lanzador GTA VI.exe» junto a
+   la carpeta «Emuladores».
+2. Abrí el lanzador. En «Elegir carpeta», seleccioná tu propia copia
+   descomprimida del juego, en la carpeta que contiene MicrosoftGame.Config.
+3. Elegí «Jugar con XCL» o «Jugar con VIctory». Ambos emuladores ya vienen
+   compilados. Al usar XCL por primera vez, el lanzador descarga dos
+   bibliotecas de gráficos de Microsoft, comprueba su integridad y las
+   guarda en tu perfil para las próximas partidas. Ese paso requiere internet.
+
+Versiones incluidas
+
+XCL       b7aa9f3b   https://github.com/ivall/xcl
+VIctory   ffe310eb   https://github.com/Marvisak/VIctory
+
+XCL requiere una GPU con Direct3D 12, Shader Model 6.6 y mesh shaders,
+además de Gaming Services. En Windows 10, consultá «Building and usage» en
+el proyecto de XCL para preparar el Agility SDK de Direct3D 12. VIctory
+requiere una CPU con AVX2 y una GPU compatible con Direct3D 12 y SM 6.6.
+
+CGBJ tiene una tarjeta de seguimiento. «Ver en PortWatch» abre el informe
+del proyecto. Su disponibilidad se comprueba en PortWatch.
+
+Novedades e instalaciones
+
+Desde la versión 2.2.0, «Buscar cambios» también comprueba las versiones
+del launcher publicadas en github.com/Nam10R/LauncherGT. Cuando aparezca
+una nueva, pulsá «Actualizar y reiniciar». Se verifica la firma antes
+de reemplazar el ejecutable. Podés actualizar cuando termines de jugar.
+
+El lanzador busca novedades al abrirse y cada 15 minutos mientras está
+abierto. También podés pulsar «Buscar cambios». «Ver cambios» muestra el
+detalle y da acceso a la descarga del proyecto. Podés usar «Elegir .exe»
+si preferís un emulador que ya instalaste por tu cuenta.
+
+Para instalar una revisión nueva desde el código oficial necesitás internet,
+Rust x64 para Windows con rustup y Visual Studio Build Tools con «Desarrollo
+para el escritorio con C++», MSVC x64 y el SDK de Windows. Estos programas
+se usan al compilar actualizaciones. Para la primera partida podés usar las
+versiones incluidas. Si instalás las herramientas, reabrí el lanzador.
+
+Rust — https://rustup.rs/
+Visual Studio Build Tools — https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
+Configuración y fuentes
+
+Cada persona elige su carpeta del juego. Windows guarda esa selección y
+las preferencias en su propia cuenta. Las nuevas versiones también se
+instalan en el perfil de quien usa el programa.
+
+«Fuentes» contiene el código correspondiente a los emuladores incluidos,
+sus dependencias y las instrucciones de compilación. Las licencias y los
+avisos de los proyectos acompañan a sus ejecutables y a sus fuentes.

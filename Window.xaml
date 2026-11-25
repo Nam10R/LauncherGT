@@ -1,0 +1,90 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GTA VI · Lanzador" Width="970" Height="812" MinWidth="660" MinHeight="440"
+        WindowStartupLocation="CenterScreen" Background="#101017" Foreground="#FFF9F4"
+        FontFamily="Inter, Segoe UI" UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
+  <Window.Resources>
+    <Style TargetType="Button" x:Key="Action">
+      <Setter Property="Background" Value="#292835"/><Setter Property="Foreground" Value="#FAF4EF"/>
+      <Setter Property="BorderBrush" Value="#45414D"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="13,7"/><Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value><ControlTemplate TargetType="Button">
+          <Border x:Name="Box" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="Opacity" Value="0.84"/></Trigger>
+            <Trigger Property="IsPressed" Value="True"><Setter TargetName="Box" Property="Opacity" Value="0.67"/></Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="White"/></Trigger>
+            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Box" Property="Opacity" Value="0.53"/></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate></Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="TextAction" TargetType="Button" BasedOn="{StaticResource Action}">
+      <Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#E3CFEB"/><Setter Property="Padding" Value="1,3"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/><Setter Property="FontSize" Value="12"/>
+    </Style>
+  </Window.Resources>
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid x:Name="PageRoot" Background="#101017">
+      <Grid.RowDefinitions><RowDefinition Height="238"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <Grid ClipToBounds="True" Background="#25172C">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="0.43*"/><ColumnDefinition Width="0.57*"/></Grid.ColumnDefinitions>
+        <Rectangle Grid.ColumnSpan="2"><Rectangle.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="0.9,1">
+          <GradientStop Color="#1D172B" Offset="0"/><GradientStop Color="#382139" Offset="0.52"/><GradientStop Color="#47233C" Offset="1"/>
+        </LinearGradientBrush></Rectangle.Fill></Rectangle>
+        <Border x:Name="Cover" Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+        <Rectangle Grid.Column="1" IsHitTestVisible="False">
+          <Rectangle.Fill><LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+            <GradientStop Color="#302035" Offset="0"/><GradientStop Color="#D5302035" Offset="0.045"/>
+            <GradientStop Color="#00302035" Offset="0.27"/>
+          </LinearGradientBrush></Rectangle.Fill>
+        </Rectangle>
+        <StackPanel VerticalAlignment="Center" Margin="32,0,0,0">
+          <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
+            <Border Width="23" Height="3" CornerRadius="1" Background="#FC9BAB" VerticalAlignment="Center" Margin="0,0,9,0"/>
+            <TextBlock Text="GRAND THEFT AUTO VI" Foreground="#FFC0C5" FontFamily="Barlow, Segoe UI" FontSize="13" FontWeight="Bold"/>
+          </StackPanel>
+          <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" Margin="0,0,10,0">
+            <TextBlock Text="LANZADOR" FontFamily="Barlow Condensed, Impact" FontSize="64" Foreground="#FFFAF1"/>
+          </Viewbox>
+          <TextBlock Text="Xbox Series X  /  Windows" FontSize="15" Foreground="#E0CEDD" Margin="2,6,0,0"/>
+        </StackPanel>
+        <Rectangle Grid.ColumnSpan="2" Height="2" VerticalAlignment="Bottom">
+          <Rectangle.Fill><LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+            <GradientStop Color="#FFB99F" Offset="0"/><GradientStop Color="#E989BB" Offset="0.48"/><GradientStop Color="#67D2CB" Offset="1"/>
+          </LinearGradientBrush></Rectangle.Fill>
+        </Rectangle>
+      </Grid>
+      <StackPanel Grid.Row="1" Margin="28,19,28,18">
+        <Border Background="#30232F" BorderBrush="#EA9AA7" BorderThickness="3,0,0,0" Padding="13,9" Margin="0,0,0,12">
+          <TextBlock x:Name="Warning" Text="Advertencia: para jugar al GTA 6, necesitás tener toda la data (208,50 GB)." TextWrapping="Wrap" FontSize="14" Foreground="#FFDDCF" FontWeight="SemiBold"/>
+        </Border>
+        <DockPanel Margin="0,0,0,15">
+          <Button x:Name="ChooseGame" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="14,0,0,0" Style="{StaticResource Action}" Content="Elegir carpeta"/>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="Carpeta del juego" FontWeight="SemiBold" FontSize="14"/>
+            <TextBlock x:Name="GameLocation" Text="Elegí dónde tenés tu copia de GTA VI." Foreground="#C8BBCD" FontSize="13" TextTrimming="CharacterEllipsis"/>
+          </StackPanel>
+        </DockPanel>
+        <DockPanel Margin="0,0,0,13">
+          <Button x:Name="Refresh" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource Action}"
+                  ToolTip="Consultar GitHub y PortWatch ahora. Se comprueban cada 15 minutos." Content="↻  Buscar cambios"/>
+          <TextBlock Text="Emuladores" FontSize="26" FontWeight="Bold" VerticalAlignment="Center"/>
+        </DockPanel>
+        <StackPanel x:Name="Cards"/>
+        <Border Background="#36333F" Height="1" Margin="0,5,0,10"/>
+        <WrapPanel Margin="0,0,0,6">
+          <TextBlock x:Name="LauncherVersion" VerticalAlignment="Center" Foreground="#E0CEDD" Margin="0,0,12,0"/>
+          <Button x:Name="UpdateLauncher" Content="Actualizar y reiniciar" Style="{StaticResource Action}" Visibility="Collapsed"/>
+        </WrapPanel>
+        <TextBlock x:Name="Footer" Text="Consultando GitHub y PortWatch…" TextWrapping="Wrap" Foreground="#BDB4C5" FontSize="12"/>
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
+</Window>
